@@ -21,7 +21,8 @@ var set_state = function(name) {
 var elm = document.getElementById('main');
 //Set up web socket
 websocketConnect = function(link) {
-    var ws = new ReconnectingWebsocket("ws://tic-tac-toe-ph.herokuapp/websocket/"+link);
+    var protocolPrefix = (window.location.protocol === 'https:') ? 'wss:' : 'ws:';
+    var ws = new WebSocket(protocolPrefix + '//' + location.host + "/websocket/" + link);
     ws.onmessage = function(evt) {
         console.log("connecting..");
         data = JSON.parse(evt.data)
