@@ -1,5 +1,6 @@
 import tornado.ioloop
 import tornado.web
+import tornado.httpserver
 import tornado.websocket
 import json
 import time
@@ -8,6 +9,7 @@ import numpy as np
 import random
 import string
 import json
+import os
 
 connections = dict()
 connections['pepe'] = 'pepe'
@@ -243,5 +245,7 @@ if __name__ == "__main__":
                 (r"/game/(.*)", tornado.web.StaticFileHandler, {'path':r'./public'}),
                 (r"/create/", RoomTokenGenerator)
     ])
-    application.listen(8888)
-    tornado.ioloop.IOLoop.current().start()
+    http_server = tornado.httpserver.HTTPServer(application)
+    port = int(os.environ.get("PORT", 5000))
+    http_server.listen(port)
+    tornado.ioloop.IOLoop.instance().start()
