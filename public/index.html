@@ -1,0 +1,27 @@
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css" />
+<script>
+function create_room() {
+    $.ajax({
+        url : '/create/',
+        type : "POST",
+        success : function(json) {
+            console.log(json);
+            $('#results2').html("<div class='alert-box alert radius' data-alert><a href='#' class='close'>Success creating room (click button bellow)</a></div>");
+            window.location.href = window.location.href+"/game/"+data.token_room;
+        },
+        error : function(xhr,errmsg,err) {
+            $('#results2').html("<div class='alert-box alert radius' data-alert><a href='#' class='close'>TRY AGAIN LATER, SERVER MIGHT BE BUSY&times;</a></div>"); 
+        }
+    });
+};
+</script>
+</head>
+<body>
+<h1>TicTacToe</h1>
+<h2 id="results2"></h2>
+<a href="" id="room_go" ><button id="button_go" type="hidden">Go to room</button></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script>
+function create_room() {
+    $.ajax({
+        url : '/create/',
+        type : "POST",
+        success : function(json) {
+            console.log(json);
+            $('#results2').html("<div class='alert-box alert radius' data-alert><a href='#' class='close'>Success creating room (click button bellow)</a></div>");
+            var result = json.substring(1, json.length-1);
+            window.location.href = window.location.href+"game/"+result;
+        },
+        error : function(xhr,errmsg,err) {
+            $('#results2').html("<div class='alert-box alert radius' data-alert><a href='#' class='close'>TRY AGAIN LATER, SERVER MIGHT BE BUSY&times;</a></div>"); 
+        }
+    });
+};
+</script>
+</head>
+<body>
+<h1>TicTacToe</h1>
+<h2 id="results2"></h2>
+<a><button id="button_go" type="submit" onclick=create_room()>Create room</button></a>
+</div>
+</body>
+</html>
