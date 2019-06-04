@@ -12,7 +12,7 @@ function create_room() {
         type : "POST",
         success : function(json) {
             console.log(json);
-            $('#results2').html("<div class='alert-box alert radius' data-alert><a href='#' class='close'>Success creating room (click button bellow)</a></div>");
+            $('#results2').html("<div class='alert-box alert radius' data-alert><a href='#' class='close'>Success creating room Redirecting Soon</a></div>");
             var result = json.substring(1, json.length-1);
             window.location.href = window.location.href+"game/"+result;
         },

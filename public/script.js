@@ -63,6 +63,10 @@ websocketConnect = function(link) {
             };
         };
     };
+    ws.onclose = function(evt) {
+        document.getElementById('illegal').innerHTML = "This room is not legally created, try creating the legal one";
+        set_state('create_room');
+    }
 
     return ws;
 }

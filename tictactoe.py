@@ -99,6 +99,7 @@ class GameWebSocket(tornado.websocket.WebSocketHandler):
         print("WebSocket opened")
         print(self)
         self.room_key = key
+        
         if key in connections.keys():
             connections[key].append(self)
         else:
@@ -106,6 +107,9 @@ class GameWebSocket(tornado.websocket.WebSocketHandler):
             connections[key].append(self)
         print(connections[key])
         self.update_state()   
+        if key not in room_list.keys():
+            print("Closing websocket you are not allowed to connect")
+            self.close()
         
     def update_state(self):
         players = [x.player for x in connections[self.room_key]]
@@ -168,15 +172,11 @@ class GameWebSocket(tornado.websocket.WebSocketHandler):
                 info = gws.move(message['move'])
             else:
                 info = {'player':'x','state':'game','game_state':'invalid','board':gws.make_serializable(gws.board),'boardX':gws.status_stack['x'], 'boardO': gws.status_stack['o'], 'turn': [gws.counter_turn['x'],gws.counter_turn['o']]}
-       # print 'player = {}'.format(self.player)
-       # print 'turn = {}'.format(gws.current_player)
-       # info = gws.move(message['move'])
         info['player'] = 'x'
         self.find_player('x').write_message(info)
         info['player'] = 'o'
         self.find_player('o').write_message(info)
         if (info['game_state'] == 'x' or info['game_state'] == 'o' or info['game_state'] == 'stalemate'):
-       # display "won" message for 3 seconds
             time.sleep(3)
             print ("I should be restarting now!")
             self.update_state()
@@ -199,7 +199,6 @@ class GameWebSocket(tornado.websocket.WebSocketHandler):
                 print ('o forfeits')
                 self.find_player('x').write_message({'state':'won'})
                 self.find_player('x').player = None;
-                #Allow forfeit message display for 3 seconds
                 time.sleep(3)
         if self.player == 'x':
             print ('reseting board')
@@ -209,7 +208,6 @@ class GameWebSocket(tornado.websocket.WebSocketHandler):
                 print ('x forfeits')
                 self.find_player('o').write_message({'state':'won'})
                 self.find_player('o').player = None;
-                #Allow forfeit message display for 3 seconds
                 time.sleep(3)
         for i, x in enumerate(connections[self.room_key]):
             print(i,x)
@@ -232,12 +230,14 @@ class GameRoomHandler(tornado.web.RequestHandler):
 class RoomTokenGenerator(tornado.web.RequestHandler):
     def post(self):
         token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(10))
+        room_list[token] = token
         self.write(json.dumps(token))
         self.finish()
         
 if __name__ == "__main__":
     game = Game() 
     connections = {}
+    room_list = {}
     application = tornado.web.Application([
                 (r"/websocket/(?P<key>\w+)", GameWebSocket),
                 (r"/", RedirectHandler),
