@@ -95,6 +95,7 @@ class GameWebSocket(tornado.websocket.WebSocketHandler):
         tornado.websocket.WebSocketHandler.__init__(self,*args,**kwargs)
         self.player = None
         self.room_key = None
+        self.round = 0
     def open(self, key): 
         print("WebSocket opened")
         print(self)
@@ -140,14 +141,26 @@ class GameWebSocket(tornado.websocket.WebSocketHandler):
             elif ('x' in players) and ('o' in players):
                 print ('creating a new game and sending the announcement')
                 GameWebSocket.game = Game()
-                connections[self.room_key][players.index('x')].write_message({'state':'game',
-                        'game_state':'x_turn',
-                        'player':'x',
-                        'board':GameWebSocket.game.make_serializable(GameWebSocket.game.board)})
-                connections[self.room_key][players.index('o')].write_message({'state':'game',
-                       'game_state':'x_turn',
-                       'player':'o',
-                       'board':GameWebSocket.game.make_serializable(GameWebSocket.game.board)})
+                if(self.round % 2 == 1):
+                    connections[self.room_key][players.index('x')].write_message({'state':'game',
+                            'game_state':'x_turn',
+                            'player':'x',
+                            'board':GameWebSocket.game.make_serializable(GameWebSocket.game.board)})
+                    connections[self.room_key][players.index('o')].write_message({'state':'game',
+                           'game_state':'x_turn',
+                           'player':'o',
+                           'board':GameWebSocket.game.make_serializable(GameWebSocket.game.board)})
+                    self.round += 1
+                elif(self.round % 2 == 0):
+                    connections[self.room_key][players.index('x')].write_message({'state':'game',
+                            'game_state':'o_turn',
+                            'player':'x',
+                            'board':GameWebSocket.game.make_serializable(GameWebSocket.game.board)})
+                    connections[self.room_key][players.index('o')].write_message({'state':'game',
+                            'game_state':'o_turn',
+                            'player':'o',
+                            'board':GameWebSocket.game.make_serializable(GameWebSocket.game.board)})
+                    self.round += 1
             else:
                 for x in connections[self.room_key]: 
                     if not x.player:
@@ -176,7 +189,7 @@ class GameWebSocket(tornado.websocket.WebSocketHandler):
         self.find_player('x').write_message(info)
         info['player'] = 'o'
         self.find_player('o').write_message(info)
-        if (info['game_state'] == 'x' or info['game_state'] == 'o' or info['game_state'] == 'stalemate'):
+        if (info['game_state'] == 'x' or info['game_state'] == 'o'):
             time.sleep(3)
             print ("I should be restarting now!")
             self.update_state()
