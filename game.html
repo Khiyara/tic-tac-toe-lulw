@@ -1,14 +1,17 @@
 <html>
 <head>
 <link rel="stylesheet" href="style.css" type="text/css" />
+<link rel="stylesheet" href="chat.css" type="text/css" />
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
 <h1>TicTacToe</h1>
-<div class="hide" id='on_deck'>Waiting for another player.</div>
+<div class="hide" id="on_deck">Waiting for another player.</div>
 <div id="illegal"></div>
-<a href="/" class="hide" id='create_room'>Create room here!</a>
-<div class="hide" id='game'>
-    <p id='player'></p>
+<a href="/" class="hide" id="create_room">Create room here!</a>
+<div class="container row">
+<div class="hide col-sm-6" id="game">
+    <p id="player"></p>
     <table>
     <tr>
     <td id="00"></td>
@@ -32,15 +35,50 @@
     </table>
     <p id="game_state"></p>
 </div>
-<div class="hide" id='won'>Other player forfeits!</div>
-<div class="hide" id='wait'>Game in progress. Try again Later.</div>
-<script src='script.js'></script>
+<div class="col-sm-6">
+      <div style="margin-top:50px;" id="input">
+        <form id="messageform" return="false;">
+          <table>
+            <tr>
+              <td><input onkeypress="return noenter()"false;" type="text" name="body" id="message"></td>
+              <td>
+                <button type="button" return="false;" id="button_submit">Send</button>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </div>
+      <div id="inbox">
+          
+      </div>
+    </div>
+</div>
+
+<div class="hide" id="won">Other player forfeits!</div>
+<div class="hide" id="wait">Game in progress. Try again Later.</div>
+
+<script src="script.js"></script>
+<script src="chat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.js"></script>
 <script>
 var text = '{{roomId}}';
 var ws = websocketConnect(text);
-console.log('{{roomId}}');
+var webchat = chatConnect(text);
+document.getElementById('messageform').addEventListener('submit', function() {
+    newMessage($(this));
+    return false;
+});
+document.getElementById('button_submit').addEventListener('click', function() {
+    console.log(document.getElementById('message').value);
+    newMessage(document.getElementById('message').value);
+});
+function noenter() {
+    if(window.event && window.event.keyCode == 13){
+        newMessage(document.getElementById('message').value);
+        return false;
+    }
+  }
 </script>
 </body>
 </html>

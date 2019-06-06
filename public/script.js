@@ -16,8 +16,6 @@ var set_state = function(name) {
 };
 
 
-
-
 var elm = document.getElementById('main');
 //Set up web socket
 websocketConnect = function(link) {

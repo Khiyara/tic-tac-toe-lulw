@@ -5,14 +5,14 @@ table {
   border-collapse: collapse;
   border-spacing: 0;
   table-layout: fixed;
-  height: 99px;
-  width: 99px;
+  height: 88px;
+  width: 88px;
   text-align: center;
   overflow: hidden;
 }
 table tr td {
-  width:33px;
-  height:33px;
+  width:88px;
+  height:88px;
   overflow: hidden;
   white-space: nowrap;
   cursor: pointer;

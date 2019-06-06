@@ -2,6 +2,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.httpserver
 import tornado.websocket
+import tornado.escape
 import json
 import time
 from itertools import cycle
@@ -10,6 +11,8 @@ import random
 import string
 import json
 import os
+import uuid
+
 
 connections = dict()
 connections['pepe'] = 'pepe'
@@ -238,7 +241,56 @@ class GameRoomHandler(tornado.web.RequestHandler):
     def get(self, **kwargs):
         key = kwargs.get('key')
         print(key)
-        self.render('game.html', roomId=key)
+        self.render('game.html', roomId=key, messages={})
+        
+class ChatWebSocket(tornado.websocket.WebSocketHandler):
+    
+    def __init__(self,*args,**kwargs):
+        tornado.websocket.WebSocketHandler.__init__(self,*args,**kwargs)
+        self.room_key = None
+        self.player = None
+    def open(self, key): 
+        print("chat connect")
+        self.room_key = key
+        if key in connections_chat.keys():
+            connections_chat[key].append(self)
+        else:
+            connections_chat[key] = []
+            connections_chat[key].append(self)
+        print(connections_chat[key])
+        if(connections_chat[key][0].player == None):
+            connections_chat[key][0].player = 'X'
+            self.player = 'X'
+        else:
+            connections_chat[key][1].player = 'O'
+            self.player = 'O'
+        if key not in room_list.keys():
+            print("Closing chat")
+            self.close()
+
+    def on_close(self):
+        print ('chat close')
+        for i, x in enumerate(connections_chat[self.room_key]):
+            if self == x:
+                print ('deleting it')
+                temp = connections_chat[self.room_key][i].player == 'X'
+                del(connections_chat[self.room_key][i])
+                if temp:
+                    connections_chat[self.room_key][0].player = 'X'
+
+    def send_updates(self, chat):
+        print("sending message to %d waiters", len(connections_chat[self.room_key]))
+        for waiter in connections_chat[self.room_key]:
+            try:
+                waiter.write_message(chat)
+            except:
+                print("Error sending message", exc_info=True)
+
+    def on_message(self, message):
+        print("got message %s", message)
+        chat = {"id": str(uuid.uuid4())}
+        chat["html"] = self.player+" : "+message
+        self.send_updates(chat)
 
 class RoomTokenGenerator(tornado.web.RequestHandler):
     def post(self):
@@ -250,13 +302,15 @@ class RoomTokenGenerator(tornado.web.RequestHandler):
 if __name__ == "__main__":
     game = Game() 
     connections = {}
+    connections_chat = {}
     room_list = {}
     application = tornado.web.Application([
                 (r"/websocket/(?P<key>\w+)", GameWebSocket),
                 (r"/", RedirectHandler),
                 (r"/game/(?P<key>\w+)", GameRoomHandler),
                 (r"/game/(.*)", tornado.web.StaticFileHandler, {'path':r'./public'}),
-                (r"/create/", RoomTokenGenerator)
+                (r"/create/", RoomTokenGenerator),
+                (r"/chat/(?P<key>\w+)", ChatWebSocket),
     ])
     http_server = tornado.httpserver.HTTPServer(application)
     port = int(os.environ.get("PORT", 5000))
