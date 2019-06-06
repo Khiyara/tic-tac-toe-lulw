@@ -5,7 +5,7 @@ function newMessage(form) {
 }
 
 var counter = 0;
-
+var temp_chat = []
 var chatConnect = function(link){
     var protocolPrefix = (window.location.protocol === 'https:') ? 'wss:' : 'ws:';
     var ws = new WebSocket(protocolPrefix + '//' + location.host + "/chat/" + link);
@@ -27,9 +27,13 @@ showMessage = function(message) {
         counter += 1;
         if(counter > 10) {
             document.getElementById('inbox').innerHTML = "";
-            counter = 0;
+            temp_chat.splice(0,1);
         }
-        document.getElementById('inbox').append(temp);
+        temp_chat.push(temp);
+        document.getElementById('inbox').innerHTML = "";
+        for(let i = 0; i < temp_chat.length; i++) {
+            document.getElementById('inbox').append(temp_chat[i]);
+        }
     }
 }
 
