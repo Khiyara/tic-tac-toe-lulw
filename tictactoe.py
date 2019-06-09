@@ -176,6 +176,8 @@ class GameWebSocket(tornado.websocket.WebSocketHandler):
         print ('message is')
         print (message)
         message = json.loads(message)
+        if (len(connections[self.room_key]) < 2):
+            return
         if self.player == 'o':
             print ('O is trying making a move')
             print (message['move'])
@@ -220,7 +222,7 @@ class GameWebSocket(tornado.websocket.WebSocketHandler):
                 time.sleep(3)
         if self.player == 'x':
             print ('reseting board')
-            connections_game[self.room_key] = Game('x', 1)
+            connections_game[self.room_key] = Game('o', 1)
             print ('deleting x')
             if self.find_player('o'):
                 print ('x forfeits')
